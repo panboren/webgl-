@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>颜色和纹理</title>
+</head>
+<body>
+<canvas id="web01" width="500" height="500"></canvas>
+<script src="js/lid.js"></script>
+<script src="js/matrix.js"></script>
+<script>
+
+    let canvas = document.getElementById('web01');
+    let gl = canvas.getContext('webgl');
+
+    //顶点着色器
+    //attribute  指定限定符  (使用attribute变量)
+    //声明attribute变量  vec4 a_pos;
+    //声明旋转的变量 uniform  mat4矩阵 u_change;
+    let VERTEX_SHADER = '' +
+        'attribute vec4 a_pos;' +
+        'attribute vec4 a_color;' +
+        'varying vec4 v_color;' +
+        'void main (){' +
+        'gl_Position=a_pos;' +
+        'v_color=a_color;' +
+        'gl_PointSize=20.0;' +
+        '}';
+    //片元着色器
+    //precision lowp float;指定低精度
+      //设置颜色变量需要设置精度
+    let FRAG_SHADER = '' +
+        'precision lowp float;' +
+        'varying vec4 v_color;' +
+        'void main(){' +
+        'gl_FragColor=v_color;' +
+        '}';
+    //封装初始化着色器
+    let program = init(gl, VERTEX_SHADER, FRAG_SHADER);
+    //放置顶点信息  32是单精度 64是双精度
+    let dataVertices = new Float32Array([
+        -0.2, -0.2, 1.0, 0.0, 0.0,
+        0.0, 0.2,  0.0, 1.0, 0.0,
+        0.2, -0.2, 0.0, 0.0, 1.0,
+    ]);
+
+    //获取字节数
+    let FSIZE = dataVertices.BYTES_PER_ELEMENT;
+
+    let buffersize = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffersize);
+    gl.bufferData(gl.ARRAY_BUFFER, dataVertices, gl.STATIC_DRAW);
+
+    let a_pos = gl.getAttribLocation(program, 'a_pos');
+    let a_color = gl.getAttribLocation(program, 'a_color');
+    gl.vertexAttribPointer(a_pos, 2, gl.FLOAT, false, FSIZE * 5, 0);
+    gl.vertexAttribPointer(a_color, 3, gl.FLOAT, false, FSIZE * 5/*两个顶点间的字节数（每5个为一组）*/, FSIZE * 2/*偏移量(减去前两个数)*/);
+    gl.enableVertexAttribArray(a_pos);
+    gl.enableVertexAttribArray(a_color);
+    /*gl.drawArrays(gl.POINTS, 0, 3);*/  //三个点三种颜色
+    gl.drawArrays(gl.TRIANGLES, 0, 3);//三角形三个角三种颜色过度渐变
+
+</script>
+</body>
+</html>

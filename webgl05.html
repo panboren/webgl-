@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>绘制基本图形</title>
+</head>
+<body>
+<canvas id="web01" width="500" height="500"></canvas>
+<script src="js/lid.js"></script>
+<script>
+
+    let canvas = document.getElementById('web01');
+    let gl = canvas.getContext('webgl');
+
+    //顶点着色器
+    //attribute  指定限定符  (使用attribute变量)
+    //声明attribute变量  vec4 a_pos;
+    let VERTEX_SHADER = '' +
+        'attribute vec4 a_pos;' +
+        'void main (){' +
+        'gl_Position=a_pos;' +
+        'gl_PointSize=10.0;' +
+        '}';
+    //片元着色器
+    //precision lowp float;指定低精度
+    //声明uniform 变量
+    let FRAG_SHADER = '' +
+        'void main(){' +
+        'gl_FragColor=vec4(1.0,0.0,0.0,1.0);' +
+        '}';
+
+    //封装初始化着色器
+    let program=init(gl,VERTEX_SHADER,FRAG_SHADER);
+
+    //放置顶点信息  32是单精度 64是双精度
+    let dataVertices=new Float32Array([
+        0.0,0.0,
+        0.6,0.0,
+        0.3,0.3,
+        -0.3,0.3,
+        -0.6,0.0,
+        -0.3,-0.3,
+        0.3,-0.3,
+        0.6,0.0,
+    ]);
+
+    //创建buffer
+   let buffer=gl.createBuffer();
+   //绑定buffer 目标
+    gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+
+    //向缓冲区buffer写入数据
+    gl.bufferData(gl.ARRAY_BUFFER,dataVertices,gl.STATIC_DRAW);
+    
+    //获取 attribute
+    let a_pos = gl.getAttribLocation(program, 'a_pos');
+    //向缓冲区对象分配给a_pos对象   2 代表放置顶点信息dataVertices 两个数为一组
+    gl.vertexAttribPointer(a_pos,2,gl.FLOAT,false,0,0);
+    //开启attribute对象
+    gl.enableVertexAttribArray(a_pos);
+
+    gl.clearColor(1.0, 0.9, 0.3, 1.0);//绘色
+    gl.clear(gl.COLOR_BUFFER_BIT);//清屏
+    //绘制
+    //线
+   /* gl.drawArrays(gl.LINES, 0,2);//绘制线段要2个点*/
+    /*gl.drawArrays(gl.LINE_STRIP, 0,5);//绘制线段带要3个点 （折线）*/
+   /* gl.drawArrays(gl.LINE_LOOP, 0,3);//绘制回路 3个点    （可以绘制空心三角形。。。）*/
+    gl.drawArrays(gl.LINE_LOOP, 0,3);
+   //三角形
+   /* gl.drawArrays(gl.TRIANGLES, 0,3);//绘制三角形 实心 */
+    //gl.drawArrays(gl.TRIANGLE_STRIP, 0,4);//绘制三角带 实心 （如果是多边形的话，先绘制成三角形再继续连）
+   /* gl.drawArrays(gl.TRIANGLE_FAN, 0,6);//绘制三角扇*/
+
+
+
+</script>
+</body>
+</html>

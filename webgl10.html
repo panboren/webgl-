@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>缩放操作</title>
+</head>
+<body>
+<canvas id="web01" width="500" height="500"></canvas>
+<script src="js/lid.js"></script>
+<script>
+
+    let canvas = document.getElementById('web01');
+    let gl = canvas.getContext('webgl');
+
+    //顶点着色器
+    //attribute  指定限定符  (使用attribute变量)
+    //声明attribute变量  vec4 a_pos;
+    //声明旋转的变量 uniform float u_sinB,u_cosB;   float是浮点数
+    let VERTEX_SHADER = '' +
+        'attribute vec4 a_pos;' +
+        'uniform float u_change;' +
+        'void main (){' +
+        'gl_Position.x=a_pos.x;' +
+        'gl_Position.y=a_pos.y;' +
+        'gl_Position.z=a_pos.z;' +
+        'gl_Position.w=u_change;' +
+        '}';
+    //片元着色器
+    let FRAG_SHADER = '' +
+        'void main(){' +
+        'gl_FragColor=vec4(0.5,0.3,0.6,1.0);' +
+        '}';
+
+    //封装初始化着色器
+    let program=init(gl,VERTEX_SHADER,FRAG_SHADER);
+    //放置顶点信息  32是单精度 64是双精度
+    let dataVertices=new Float32Array([
+        -0.2,-0.2,
+        0.0,0.2,
+        0.2,-0.2,
+    ]);
+    bufferInit(gl,dataVertices,'a_pos',program);
+    let u_change=gl.getUniformLocation(program,'u_change');
+    gl.clearColor(0.0,0.0,0.0,1.0);
+
+
+    //定义缩放
+    let w=1.0;
+    window.onkeydown=function(e){
+        switch (e.keyCode) {
+            case 38:
+                w-=0.1;
+                break;
+            case 40:
+                w+=0.1;
+                break;
+            default:
+                console.log('按错了');
+        }
+        run();
+    }
+    run();
+    function run() {
+        gl.uniform1f(u_change,w);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        //绘制
+        gl.drawArrays(gl.TRIANGLES,0,3);
+    }
+
+
+
+</script>
+</body>
+</html>

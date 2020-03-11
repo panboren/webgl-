@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<canvas id="web01" width="500" height="500"></canvas>
+<script>
+
+    let canvas=document.getElementById('web01');
+    let gl=canvas.getContext('webgl');
+
+    /*着色器初始化*/
+      //顶点着色器
+     let VERTEX_SHADER='' +
+         'void main(){' +
+            'gl_Position=vec4(0.0,0.0,1.0,1.0);'+
+             'gl_PointSize=10.0;'+
+         '}';
+    //片元着色器
+    let FRAG_SHADER='' +
+        'void main(){' +
+        'gl_FragColor=vec4(1.0,0.0,0.0,1.0);' +
+        '}';
+    //创建顶点着色器
+    let vertex=gl.createShader(gl.VERTEX_SHADER);
+    //创建片源着色器
+     let frag=gl.createShader(gl.FRAGMENT_SHADER);
+     //指定顶点着色器和片元着色器对象
+     gl.shaderSource(vertex,VERTEX_SHADER);
+    gl.shaderSource(frag,FRAG_SHADER);
+    //编译顶点和片元着色器
+     gl.compileShader(vertex);
+     gl.compileShader(frag);
+     //创建对象
+    let program=gl.createProgram();
+        //分配着色器对象
+    gl.attachShader(program,vertex);
+    gl.attachShader(program,frag);
+    //链接程序对象
+    gl.linkProgram(program);
+    //告诉webgl使用对象
+    gl.useProgram(program);
+    gl.clearColor(1.0,0.9,0.3,0.5);
+    gl.clear(gl.COLOR_BUFFER_BIT);//清屏
+
+    //绘制
+    gl.drawArrays(gl.POINTS,0,1);//0 从0开始  1 绘制一个
+
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>矩阵变换</title>
+</head>
+<body>
+<canvas id="web01" width="500" height="500"></canvas>
+<script src="js/lid.js"></script>
+<script src="js/matrix.js"></script>
+<script>
+
+    let canvas = document.getElementById('web01');
+    let gl = canvas.getContext('webgl');
+
+    //顶点着色器
+    //attribute  指定限定符  (使用attribute变量)
+    //声明attribute变量  vec4 a_pos;
+    //声明旋转的变量 uniform  mat4矩阵 u_change;
+    let VERTEX_SHADER = '' +
+        'attribute vec4 a_pos;' +
+        'uniform mat4 u_translate;' +
+        'uniform mat4 u_rotate;' +
+        'uniform mat4 u_scale;' +
+        'void main (){' +
+        'gl_Position=u_scale*u_rotate*u_translate*a_pos;' +
+        '}';
+    //片元着色器
+    let FRAG_SHADER = '' +
+        'void main(){' +
+        'gl_FragColor=vec4(0.5,0.3,0.6,1.0);' +
+        '}';
+    //封装初始化着色器
+    let program = init(gl, VERTEX_SHADER, FRAG_SHADER);
+    //放置顶点信息  32是单精度 64是双精度
+    let dataVertices = new Float32Array([
+        -0.2, -0.2,
+        0.0, 0.2,
+        0.2, -0.2,
+    ]);
+    bufferInit(gl, dataVertices, 'a_pos', program);
+
+    let u_translate = gl.getUniformLocation(program, 'u_translate');
+    let u_rotate = gl.getUniformLocation(program, 'u_rotate');
+    let u_scale = gl.getUniformLocation(program, 'u_scale');
+    let x = 0.0;
+    let y = 0.0;
+    let angle = 0.0;
+    let x1 = 1.0;
+    let y1 = 1.0;
+
+    gl.clearColor(1.0, 0.0, 0.0, 1.0);
+
+
+    function animation() {
+        x += 0.02;
+        y += 0.02;
+        angle += 10.0;
+        x1 -= 0.01;
+        y1 -= 0.01;
+        //赋值
+        gl.uniformMatrix4fv(u_translate, false, translate(x, y, 0.0));
+
+        //赋值
+        gl.uniformMatrix4fv(u_rotate, false, rotote(angle));
+        //赋值
+        gl.uniformMatrix4fv(u_scale, false, scale(x1, y1, 1.0));
+
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+
+    function run() {
+        animation();
+        let act = requestAnimationFrame(run);
+        if (x1 < 0) {
+            cancelAnimationFrame(act);
+            alert('我一定会回来的！')
+        }
+
+    }
+
+    run();
+
+
+</script>
+</body>
+</html>

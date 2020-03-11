@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>变换-缩放操作</title>
+</head>
+<body>
+<canvas id="web01" width="500" height="500"></canvas>
+<script src="js/lid.js"></script>
+<script>
+
+    let canvas = document.getElementById('web01');
+    let gl = canvas.getContext('webgl');
+
+    //顶点着色器
+    //attribute  指定限定符  (使用attribute变量)
+    //声明attribute变量  vec4 a_pos;
+    //声明旋转的变量 uniform float u_sinB,u_cosB;   float是浮点数
+    let VERTEX_SHADER = '' +
+        'attribute vec4 a_pos;' +
+        'uniform float u_sinB,u_cosB;' +
+        'void main (){' +
+        'gl_Position.x=a_pos.x*u_cosB-a_pos.y*u_sinB;' +
+        'gl_Position.y=a_pos.x*u_sinB+a_pos.y*u_cosB;' +
+        'gl_Position.z=a_pos.z;' +
+        'gl_Position.w=a_pos.w;' +
+        '}';
+    //片元着色器
+    let FRAG_SHADER = '' +
+        'void main(){' +
+        'gl_FragColor=vec4(1.0,0.0,0.0,1.0);' +
+        '}';
+
+    //封装初始化着色器
+    let program=init(gl,VERTEX_SHADER,FRAG_SHADER);
+    //放置顶点信息  32是单精度 64是双精度
+    let dataVertices=new Float32Array([
+        0.0,0.0,
+        0.3,0.3,
+        0.6,0.0,
+    ]);
+    bufferInit(gl,dataVertices,'a_pos',program);
+
+  /*  //定义旋转角度
+    let angle=30.0;
+    let sinB=Math.sin(angle/180.0*Math.PI);
+    let cosB=Math.cos(angle/180.0*Math.PI);
+
+    //拿uniform 变量
+    let u_sinB=gl.getUniformLocation(program,'u_sinB');
+    let u_cosB=gl.getUniformLocation(program,'u_cosB');
+
+     //赋值
+      gl.uniform1f(u_sinB,sinB);
+      gl.uniform1f(u_cosB,cosB);
+
+      //绘制
+    gl.drawArrays(gl.TRIANGLES,0,3);*/
+
+    //定义旋转角度
+    let angle=0.0;
+
+    window.onkeydown=function(e){
+        switch (e.keyCode) {
+            case 38:
+                angle+=4;
+                break;
+            case 40:
+                angle-=4;
+                break;
+            default:
+                console.log('按错了');
+        }
+        run();
+    }
+    run();
+    function run() {
+
+        let sinB=Math.sin(angle/180.0*Math.PI);
+        let cosB=Math.cos(angle/180.0*Math.PI);
+
+        //拿uniform 变量
+        let u_sinB=gl.getUniformLocation(program,'u_sinB');
+        let u_cosB=gl.getUniformLocation(program,'u_cosB');
+
+        //赋值
+        gl.uniform1f(u_sinB,sinB);
+        gl.uniform1f(u_cosB,cosB);
+
+        //绘制
+        gl.drawArrays(gl.TRIANGLES,0,3);
+    }
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>

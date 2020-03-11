@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>矩阵变换</title>
+</head>
+<body>
+<canvas id="web01" width="500" height="500"></canvas>
+<script src="js/lid.js"></script>
+<script>
+
+    let canvas = document.getElementById('web01');
+    let gl = canvas.getContext('webgl');
+
+    //顶点着色器
+    //attribute  指定限定符  (使用attribute变量)
+    //声明attribute变量  vec4 a_pos;
+    //声明旋转的变量 uniform  mat4矩阵 u_change;
+    let VERTEX_SHADER = '' +
+        'attribute vec4 a_pos;' +
+        'uniform mat4 u_change;' +
+        'void main (){' +
+        'gl_Position=u_change*a_pos;' +
+        '}';
+    //片元着色器
+    let FRAG_SHADER = '' +
+        'void main(){' +
+        'gl_FragColor=vec4(0.5,0.3,0.6,1.0);' +
+        '}';
+
+    //封装初始化着色器
+    let program=init(gl,VERTEX_SHADER,FRAG_SHADER);
+    //放置顶点信息  32是单精度 64是双精度
+    let dataVertices=new Float32Array([
+        -0.2,-0.2,
+        0.0,0.2,
+        0.2,-0.2,
+    ]);
+    bufferInit(gl,dataVertices,'a_pos',program);
+   /* //缩放
+    let Tx=1.0;
+    let Ty=1.0;
+    let Tz=1.0;*/
+    //平移
+    let Tx=0.1;
+    let Ty=0.1;
+    let Tz=0.1;
+
+    let angle=0;//旋转
+
+
+
+    window.onkeydown=function(e){
+       /* //平移
+        switch (e.keyCode) {
+            case 37:
+                Tx-=0.01;
+                break;
+            case 38:
+                Ty-=0.01;
+                break;
+            case 39:
+                Tx+=0.01;
+                break;
+            case 40:
+                Ty+=0.01;
+                break;
+            default:
+                console.log('按错了');
+        }*/
+
+        //缩放
+       /* switch (e.keyCode) {
+            case 37:
+                Tx-=0.01;
+                Ty-=0.01;
+                break;
+            case 38:
+             Tx-=0.01;
+                Ty-=0.01;
+                break;
+            case 39:
+                Tx+=0.01;
+                break;
+            case 40:
+                Ty+=0.01;
+                break;
+            default:
+                console.log('按错了');
+        }*/
+
+       //旋转
+         switch (e.keyCode) {
+             case 37:
+                 angle-=5;
+                 break;
+             case 38:
+                 angle+=5;
+                 break;
+             default:
+                 console.log('按错了');
+         }
+        run();
+    }
+    run();
+    function run() {
+      /*  //平移矩阵
+        let dataMatrix=new Float32Array([
+            1.0,0.0,0.0,0.0,
+            0.0,1.0,0.0,0.0,
+            0.0,0.0,1.0,0.0,
+            Tx,Ty,Tz,1.0,
+    ]);*/
+
+     /*   //缩放矩阵
+        let dataMatrix=new Float32Array([
+            Tx,0.0,0.0,0.0,
+            0.0,Ty,0.0,0.0,
+            0.0,0.0,Tz,0.0,
+            0.0,0.0,0.0,1.0,
+        ]);*/
+
+        //旋转矩阵
+        let cosB=Math.cos(Math.PI*angle/180.0);
+        let sinB=Math.sin(Math.PI*angle/180.0);
+        let dataMatrix=new Float32Array([
+            cosB,-sinB,0.0,0.0,
+            sinB,cosB,0.0,0.0,
+            0.0,0.0,Tz,0.0,
+            0.0,0.0,0.0,1.0,
+        ]);
+        //找位置放到data中
+        let u_change=gl.getUniformLocation(program,'u_change');
+        //赋值
+        gl.uniformMatrix4fv(u_change,false,dataMatrix);
+
+        gl.drawArrays(gl.TRIANGLES,0,3);
+    }
+
+
+    
+</script>
+</body>
+</html>

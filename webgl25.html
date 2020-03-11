@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>正方形</title>
+</head>
+<body style="width: 100%;height: 100%">
+<canvas style="margin: 200px auto" id="web01" width="500" height="500"></canvas>
+
+
+<script src="js/lid.js"></script>
+<script src="js/cuon-matrix.js"></script>
+
+<script>
+    let canvas = document.getElementById('web01');
+    let gl = canvas.getContext('webgl');
+    /*第一部分*/
+    //varying 把变量传给片源
+    let VERTEX_SHADER = '' +
+        'attribute vec4 a_pos;' +
+        'attribute vec4 a_color;' +
+        'varying vec4 v_color;' +
+        'uniform mat4 u_MVPMatrix;' +
+        'void main (){' +
+        'gl_Position=u_MVPMatrix*a_pos;' +
+        'v_color=a_color;' +
+        '}';
+    /*第二部分*/
+    //varying定义变量接纹理坐标
+    let FRAG_SHADER = '' +
+        'precision lowp float;' +
+        'varying vec4 v_color;' +
+        'void main(){' +
+        'gl_FragColor=v_color;' +
+        '}';
+
+    let program = init(gl, VERTEX_SHADER, FRAG_SHADER);
+
+    /*第三部分*/
+    //准备顶点信息以及纹理顶点信息
+    let dataVertices = new Float32Array([
+        0.0, 0.0, 1.0, 0.5, 0.5, 0.5,
+        1.0, 0.0, 1.0, 0.0, 1.9, 0.7,
+        0.0, 1.0, 1.0, 0.0, 1.0, 0.3,
+        1.0, 1.0, 1.0, 1.0, 0.6, 0.4,
+        0.0, 0.0, 0.0, 0.5, 0.0, 0.6,
+        1.0, 0.0, 0.0, 0.9, 0.3, 0.6,
+        0.0, 1.0, 0.0, 0.5, 0.6, 0.6,
+        1.0, 1.0, 0.0, 0.6, 0.7, 0.6,
+    ]);
+    //拿字节数
+    let FSIZE = dataVertices.BYTES_PER_ELEMENT;
+    //拿索引
+    let index = new Uint8Array([
+        0, 1, 2, 1, 2, 3,
+        2, 3, 7, 2, 7, 6,
+        1, 7, 3, 1, 5, 7,
+        6, 7, 4, 7, 5, 4,
+        0, 4, 1, 1, 4, 5,
+        2, 6, 4, 0, 2, 4
+    ])
+    //创建缓冲区对象。将顶点信息和纹理信息都传入进去
+    let buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, dataVertices, gl.STATIC_DRAW);
+    let a_pos = gl.getAttribLocation(program, 'a_pos');
+    let a_color = gl.getAttribLocation(program, 'a_color');
+    //赋值
+    gl.vertexAttribPointer(a_pos, 3, gl.FLOAT, false, FSIZE * 6, 0);
+    gl.vertexAttribPointer(a_color, 3, gl.FLOAT, false, FSIZE * 6, FSIZE * 3);
+    //启动变量
+    gl.enableVertexAttribArray(a_pos);
+    gl.enableVertexAttribArray(a_color);
+
+    //创建索引缓冲区
+    let indexbuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexbuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, index, gl.STATIC_DRAW);
+
+    //拿到顶点着色器矩阵的位置
+    let u_MVPMatrix = gl.getUniformLocation(program, 'u_MVPMatrix');
+    let MVP = new Matrix4();
+    MVP.setPerspective(30/*度*/, 1/*500：500*/, 1/*近*/, 100/*远*/);
+
+    /*投影矩阵和视图矩阵合起来*/
+    MVP.lookAt(2, 3, 4,/*视点*/0, 0, 0, 1, /*目标的*/ 0, 0, 0/*双方向*/);
+    /*赋值*/
+    gl.uniformMatrix4fv(u_MVPMatrix, false, MVP.elements);
+
+    /*清屏操作*/
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    /*消除隐藏面*/
+    gl.enable(gl.DEPTH_TEST);
+    /*清除颜色和深度缓冲区*/
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    /*绘制*/
+    gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_BYTE, 0);
+
+</script>
+</body>
+</html>

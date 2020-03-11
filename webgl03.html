@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<canvas id="web01" width="500" height="500"></canvas>
+<script>
+
+    let canvas = document.getElementById('web01');
+    let gl = canvas.getContext('webgl');
+
+    /*着色器初始化*/
+    //顶点着色器
+    //attribute  指定限定符  (使用attribute变量)
+    //声明attribute变量  vec4 a_pos;
+    let VERTEX_SHADER = '' +
+        'attribute vec4 a_pos;' +
+        'void main (){' +
+        'gl_Position=a_pos;' +
+        'gl_PointSize=45.0;' +
+        '}';
+    //片元着色器
+    //precision lowp float;指定低精度
+    //声明uniform 变量
+    let FRAG_SHADER = '' +
+        'precision lowp float;' +
+        'uniform vec4 u_color;' +
+        'void main(){' +
+        'gl_FragColor=u_color;' +
+        '}';
+
+
+    //创建顶点着色器
+    let vertex = gl.createShader(gl.VERTEX_SHADER);
+    //创建片源着色器
+    let frag = gl.createShader(gl.FRAGMENT_SHADER);
+    //指定顶点着色器和片元着色器对象
+    gl.shaderSource(vertex, VERTEX_SHADER);
+    gl.shaderSource(frag, FRAG_SHADER);
+    //编译顶点和片元着色器
+    gl.compileShader(vertex);
+    gl.compileShader(frag);
+    //创建程序对象
+    let program = gl.createProgram();
+    //分配着色器对象
+    gl.attachShader(program, vertex);
+    gl.attachShader(program, frag);
+    //链接程序对象
+    gl.linkProgram(program);
+    //告诉webgl使用对象
+    gl.useProgram(program);
+
+    /*完成着色器初始化*/
+
+    //获取 attribute
+    let a_position = gl.getAttribLocation(program, 'a_pos');
+    //获取 uniform
+    let u_color = gl.getUniformLocation(program, 'u_color');
+
+    //向attribute赋值
+    gl.vertexAttrib4f(a_position, 0.0, 0.0, 1.0, 1.0);
+    //向uniform赋值
+    gl.uniform4f(u_color, 1.0, 1.0, 0.8, 1.0);
+
+    gl.clearColor(1.0, 0.9, 0.3, 1.0);//绘色
+    gl.clear(gl.COLOR_BUFFER_BIT);//清屏
+    //绘制
+    gl.drawArrays(gl.POINTS, 0, 1);//0 从0开始  1 绘制一个
+
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>颜色和纹理</title>
+</head>
+<body>
+<canvas id="web01" width="500" height="500"></canvas>
+<script src="js/lid.js"></script>
+<script src="js/matrix.js"></script>
+<script>
+
+    let canvas = document.getElementById('web01');
+    let gl = canvas.getContext('webgl');
+
+    /*第一部分*/
+    let VERTEX_SHADER = '' +
+        'attribute vec4 a_pos;' +
+        'attribute vec2 a_TexCoord;' +
+        'varying vec2 v_TexCoord;' +
+        'void main (){' +
+        'gl_Position=a_pos;' +
+        'v_TexCoord=a_TexCoord;' +
+        '}';
+    /*第二部分*/
+    let FRAG_SHADER = '' +
+        'precision lowp float;' +
+        'uniform sampler2D u_Sampler;' +
+        'varying vec2 v_TexCoord;' +
+        'void main(){' +
+        'gl_FragColor=texture2D(u_Sampler,v_TexCoord);' +
+        '}';
+    //texture2D(u_Sampler,v_TexCoord)定义纹理
+
+    let program = init(gl, VERTEX_SHADER, FRAG_SHADER);
+
+    /*第三部分*/
+    //准备顶点信息以及纹理顶点信息
+    let dataVertices = new Float32Array([
+        -0.5, 0.5, 0.0, 1.0,
+        -0.5, -0.5, 0.0, 0.0,
+        0.5, 0.5, 1.0, 1.0,
+        0.5, -0.5, 1.0, 0.0,
+    ]);
+
+    //创建缓冲区对象。将顶点信息和纹理信息都传入进去
+    let buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, dataVertices, gl.STATIC_DRAW);
+
+    let FSIZE = dataVertices.BYTES_PER_ELEMENT;
+
+    let a_pos = gl.getAttribLocation(program, 'a_pos');
+    gl.vertexAttribPointer(a_pos, 2, gl.FLOAT, false, FSIZE*4, 0);
+
+    let a_TexCoord = gl.getAttribLocation(program, 'a_TexCoord');
+    gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, FSIZE*4, FSIZE*2);
+
+    gl.enableVertexAttribArray(a_pos);
+    gl.enableVertexAttribArray(a_TexCoord);
+
+    /*第四部分*/
+    initTextures(gl);
+
+    function initTextures(gl) {
+        let texture = gl.createTexture();//创建纹理对象
+        let u_Sampler = gl.getUniformLocation(program, 'u_Sampler');//获取位置
+        let image = new Image();
+        image.onload = function () {
+            loadTexture(gl, texture, u_Sampler, image);
+        };
+        image.src = 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1583684874245&di=35e58197e37652e599c1708d78049b66&imgtype=0&src=http%3A%2F%2Fn.sinaimg.cn%2Fsinacn%2Fw980h653%2F20171227%2Ff195-fypyuvc7973734.jpg';
+        return true;
+    }
+
+    /*第五部分*/
+    function loadTexture(gl, texture, u_Sampler, image) {
+        console.log(gl, texture, u_Sampler, image);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);//对纹理图像进行Y轴翻转
+        gl.activeTexture(gl.TEXTURE0);//开启0号纹理单元
+        gl.bindTexture(gl.TEXTURE_2D, texture);//向tartget绑定纹理对象
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);//配置纹理参数 gl.LINEAR四个像素平均
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);//配置纹理图像
+        gl.uniform1i(u_Sampler, 0);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);//由于异步加载，所以写在这里
+    }
+</script>
+</body>
+</html>

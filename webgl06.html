@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>绘制一个点 </title>
+</head>
+<body>
+<canvas id="web01" width="500" height="500"></canvas>
+<script src="js/lid.js"></script>
+<script>
+
+    let canvas = document.getElementById('web01');
+    let gl = canvas.getContext('webgl');
+
+    //顶点着色器
+    //attribute  指定限定符  (使用attribute变量)
+    //声明attribute变量  vec4 a_pos;
+    let VERTEX_SHADER = '' +
+        'attribute vec4 a_pos;' +
+        'void main (){' +
+        'gl_Position=a_pos;' +
+        'gl_PointSize=10.0;' +
+        '}';
+    //片元着色器
+    //precision lowp float;指定低精度
+    //声明uniform 变量
+    let FRAG_SHADER = '' +
+        'void main(){' +
+        'gl_FragColor=vec4(1.0,0.0,0.0,1.0);' +
+        '}';
+
+    //封装初始化着色器
+    let program=init(gl,VERTEX_SHADER,FRAG_SHADER);
+    //放置顶点信息  32是单精度 64是双精度
+    let dataVertices=new Float32Array([
+        0.0,0.0,
+        0.6,0.0,
+        0.3,0.3,
+    ]);
+    bufferInit(gl,dataVertices,'a_pos',program);
+    gl.clearColor(1.0, 0.9, 0.3, 1.0);//绘色
+    gl.clear(gl.COLOR_BUFFER_BIT);//清屏
+    //绘制
+    gl.drawArrays(gl.POINTS, 0,3);
+
+
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>长方体可视空间</title>
+</head>
+<body>
+<canvas id="web01" width="500" height="500"></canvas>
+<script src="js/lid.js"></script>
+<script src="js/cuon-matrix.js"></script>
+
+<script>
+    let canvas = document.getElementById('web01');
+    let gl = canvas.getContext('webgl');
+    /*第一部分*/
+    //varying 把变量传给片源
+    let VERTEX_SHADER = '' +
+        'attribute vec4 a_pos;' +
+        'attribute vec4 a_color;' +
+        'varying vec4 v_color;' +
+        'uniform mat4 u_ProMatrix;' +
+        'void main (){' +
+        'gl_Position=u_ProMatrix*a_pos;' +
+        'v_color=a_color;' +
+        '}';
+    /*第二部分*/
+    //varying定义变量接纹理坐标
+    let FRAG_SHADER = '' +
+        'precision lowp float;' +
+        'varying vec4 v_color;' +
+        'void main(){' +
+        'gl_FragColor=v_color;' +
+        '}';
+
+    let program = init(gl, VERTEX_SHADER, FRAG_SHADER);
+
+    /*第三部分*/
+    //准备顶点信息以及纹理顶点信息
+    let dataVertices = new Float32Array([
+        0.0, 0.5, -0.4, 0.4, 1.0, 0.4,
+        -0.5, -0.5, -0.4, 0.4, 1.0, 0.4,
+        0.5, -0.5, -0.4, 0.4, 1.0, 0.4,
+
+        0.5, 0.4, -0.2, 1.0, 0.4, 0.4,
+        -0.5, 0.4, -0.2, 1.0, 0.4, 0.4,
+        0.0, -0.6, -0.2, 1.0, 0.4, 0.4,
+
+        0.0, 0.5, 0.0, 0.4, 0.4, 1.0,
+        -0.5, -0.5, 0.0, 0.4, 0.4, 1.0,
+        0.5, -0.5, 0.0, 0.4, 0.4, 1.0,
+    ]);
+    //拿字节数
+    let FSIZE = dataVertices.BYTES_PER_ELEMENT;
+    //创建缓冲区对象。将顶点信息和纹理信息都传入进去
+    let buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, dataVertices, gl.STATIC_DRAW);
+    let a_pos = gl.getAttribLocation(program, 'a_pos');
+    let a_color = gl.getAttribLocation(program, 'a_color');
+    //赋值
+    gl.vertexAttribPointer(a_pos, 3, gl.FLOAT, false, FSIZE * 6, 0);
+    gl.vertexAttribPointer(a_color, 3, gl.FLOAT, false, FSIZE * 6, FSIZE * 3);
+    //启动变量
+    gl.enableVertexAttribArray(a_pos);
+    gl.enableVertexAttribArray(a_color);
+    let u_ProMatrix=gl.getUniformLocation(program, 'u_ProMatrix');
+
+
+
+
+    let near=0.0;
+    let far=0.5;
+    window.onkeydown = function (e) {
+        //旋转
+        switch (e.keyCode) {
+            case 38:
+                near += 0.1;
+                break;
+            case 40:
+                near -= 0.1;
+                break;
+            default:
+                console.log('按错了');
+        }
+        run();
+    };
+
+    run();
+    function run() {
+        let proMatrix = new Matrix4();
+        proMatrix.setOrtho(-1.0,1.0,-1.0,1.0,near,far);
+        gl.uniformMatrix4fv(u_ProMatrix, false, proMatrix.elements);
+
+        gl.drawArrays(gl.TRIANGLES, 0, 9);
+    }
+
+</script>
+</body>
+</html>
